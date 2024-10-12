@@ -6,3 +6,5 @@ gen
 .env
 scores.txt
 data
+__pycache__
+create_db
