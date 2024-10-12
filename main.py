@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 from datetime import datetime
 
 from aiogram import Bot, Dispatcher, types
@@ -16,7 +17,7 @@ from services.meeting_service import MeetingService
 from services.user_service import UserService
 
 logging.basicConfig(level=logging.INFO)
-bot = Bot(token="7202533150:AAHMwtAQi5JnsgEUNtGNwbBm9m1Q3HdTv80")
+bot = Bot(token=os.environ['API_KEY'])
 dp = Dispatcher()
 
 
