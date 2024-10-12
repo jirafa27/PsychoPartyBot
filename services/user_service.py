@@ -30,7 +30,7 @@ class UserService:
         if user==None:
             return None
         self.session.refresh(user)
-        return {"username": user.username, "name": user.name, "age": user.age, "description": user.description}
+        return {"id": id, "username": user.username, "name": user.name, "age": user.age, "description": user.description}
 
     def get_user_rating(self, username: str):
         user_rating = (self.session.query(Rating.score)

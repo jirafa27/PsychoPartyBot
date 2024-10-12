@@ -10,11 +10,10 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import ChatMemberUpdated, BufferedInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from db import add_new_user, delete_user, get_user_info, get_user_rating, get_user_rating_more_details, \
-    change_user_name, change_user_age, change_user_description, cancel_meeting, create_meeting_in_db, \
-    set_date_of_meeting_db, get_date_of_last_user_meeting, set_time_of_meeting_db, set_title_of_meeting_db, \
-    set_description_of_meeting_db, get_last_user_meeting, get_passed_meetings
+
 from exceptions import DateIsLessThanTodayException, NoMeetingForCancelingException, TooLongStringException
+from services.meeting_service import MeetingService
+from services.user_service import UserService
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token="7202533150:AAHMwtAQi5JnsgEUNtGNwbBm9m1Q3HdTv80")
@@ -43,7 +42,7 @@ async def cmd_start(message: types.Message, state: FSMContext):
         [types.KeyboardButton(text="Мои встречи")]
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True,)
-    add_new_user(username=message.from_user.username, name=message.from_user.first_name)
+    UserService().add_new_user(username=message.from_user.username, name=message.from_user.first_name)
     await state.set_state(Mydialog.main_menu)
     await message.answer(f"Привет, {message.from_user.first_name}!", reply_markup=keyboard)
 
@@ -55,7 +54,7 @@ async def create_meeting(message: types.Message, state: FSMContext):
     ]
 
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True,)
-    create_meeting_in_db(message.from_user.username)
+    MeetingService().create_meeting(message.from_user.username)
     await state.set_state(Mydialog.enter_date_of_meeting)
     await message.answer(f"Введите дату встречи в формате dd/mm/yyyy", reply_markup=keyboard)
 
@@ -69,7 +68,7 @@ async def cancel_meeting_creation(message: types.Message, state: FSMContext):
         [types.KeyboardButton(text="Мои встречи")]
     ]
     keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, )
-    meeting = cancel_meeting(message.from_user.username)
+    meeting = MeetingService().cancel_meeting(message.from_user.username)
     await state.set_state(Mydialog.main_menu)
     await message.answer(f"Встреча {meeting[0]} {meeting[1]} {meeting[2]} {meeting[4]} успешно отменена", reply_markup=keyboard)
 
@@ -117,7 +116,7 @@ async def set_date_of_meeting(message: types.Message, state: FSMContext):
     try:
         if datetime.strptime(date_of_meeting, format).date() < datetime.now().date():
             raise DateIsLessThanTodayException
-        set_date_of_meeting_db(date_of_meeting, message.from_user.username)
+        MeetingService().set_date_of_meeting(date_of_meeting, message.from_user.username)
         await state.set_state(Mydialog.enter_time_of_meeting)
         await message.answer(f"Введите время в формате hh:mm", reply_markup=keyboard)
     except ValueError:
